@@ -12,8 +12,13 @@ vectorizer = joblib.load("tfidf_vectorizer.pkl")
 # Text Cleaning Function
 nltk.download('stopwords')
 
+try:
+    stop_words = set(stopwords.words("english"))
+except LookupError:
+    nltk.download("stopwords")
+    stop_words = set(stopwords.words("english"))
+
 stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'<.*?>', '', text)
