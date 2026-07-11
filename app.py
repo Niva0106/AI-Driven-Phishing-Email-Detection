@@ -1,53 +1,47 @@
 import streamlit as st
 import joblib
 import re
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
 
-nltk.download('stopwords')
-
-stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
-
-# Load saved model and vectorizer
 model = joblib.load("phishing_model.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
 def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'<.*?>', '', text)
     text = re.sub(r'[^a-zA-Z\s]', '', text)
+    text = text.lower()
+    return text
 
-    words = text.split()
-    words = [stemmer.stem(word) for word in words if word not in stop_words]
+st.set_page_config(
+    page_title="PhishShield AI",
+    page_icon="🛡️",
+    layout="centered"
+)
 
-    return " ".join(words)
-
-st.title("🛡️ PhishShield AI")
-
+st.title("Catch the Phish")
 st.subheader("AI-Driven Phishing Email Detection")
 
 st.write(
-    "Paste an email below and let the model predict whether it is "
-    "a legitimate email or a phishing attempt."
+    "Paste an email below to check whether it is **Legitimate** or **Phishing**."
 )
 
 email = st.text_area(
-    "Email",
+    "Paste Email Here",
     height=250,
-    placeholder="Paste email here..."
+    placeholder="Paste the email content..."
 )
 
 if st.button("🔍 Analyze Email"):
 
-    cleaned = clean_text(email)
-
-    vector = vectorizer.transform([cleaned])
-
-    prediction = model.predict(vector)
-
-    if prediction[0] == 1:
-        st.error("⚠️ This email is likely PHISHING.")
+    if email.strip() == "":
+        st.warning("Please enter an email first.")
     else:
-        st.success("✅ This email appears LEGITIMATE.")
+
+        cleaned = clean_text(email)
+
+        vector = vectorizer.transform([cleaned])
+
+        prediction = model.predict(vector)
+
+        if prediction[0] == 1:
+            st.error("⚠️ This email is likely a PHISHING email.")
+        else:
+            st.success("✅ This email appears to be LEGITIMATE.")
