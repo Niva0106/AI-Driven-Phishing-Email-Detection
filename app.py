@@ -135,11 +135,11 @@ to detect whether an email is likely to be:
 - ⚠️ Phishing
 
 ### Model Pipeline
-• Text Cleaning
-• Porter Stemming
-• TF-IDF (7000 Features)
-• Engineered Email Features
-• Random Forest Classifier
+- Text Cleaning
+- Porter Stemming
+- TF-IDF (7000 Features)
+- Engineered Email Features
+- Random Forest Classifier
 """)
 
     st.divider()
