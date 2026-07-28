@@ -81,7 +81,7 @@ https://gone-phishing.streamlit.app/
 
 ## 📷 Screenshots
 
-![Home Page](home.png)
+![Home Page](Home.png)
 
 ### Legitimate Email Prediction
 
