@@ -1,17 +1,18 @@
 # 🎣 Gone Phishing
 
-An AI-powered phishing email detection system that classifies emails as **Legitimate** or **Phishing** using Machine Learning. The application provides an interactive web interface built with Streamlit, allowing users to paste email content and receive instant predictions.
-
+A machine learning-based phishing email detection system that classifies emails as Legitimate or Phishing. The project includes model training, evaluation, and deployment through an interactive Streamlit web application.
 ---
 
 ## 📌 Features
 
 - Detects phishing and legitimate emails
-- Text preprocessing using NLTK
-- TF-IDF Vectorization
-- Random Forest Classifier
+- Email preprocessing using NLTK
+- TF-IDF vectorization with engineered email features
+- Comparison of multiple machine learning models
+- Random Forest selected as the final deployed model
 - Prediction confidence score
 - Interactive Streamlit web interface
+- Visual summary of extracted email features
 
 ---
 
@@ -20,6 +21,7 @@ An AI-powered phishing email detection system that classifies emails as **Legiti
 - Python
 - Pandas
 - NumPy
+- SciPy
 - Scikit-learn
 - NLTK
 - Joblib
@@ -46,21 +48,22 @@ Gone-Phishing/
 ## 📊 Machine Learning Workflow
 
 1. Load the phishing email dataset.
-2. Clean and preprocess the email text.
-3. Convert text into numerical features using TF-IDF.
-4. Train multiple machine learning models.
-5. Compare model performance.
-6. Save the best-performing model.
-7. Deploy using Streamlit.
+2. Clean and preprocess email text.
+3. Extract textual and metadata-based features.
+4. Generate TF-IDF vectors.
+5. Combine TF-IDF with engineered email features.
+6. Train and compare multiple machine learning models.
+7. Evaluate models using Accuracy, Precision, Recall, F1-score and Confusion Matrices.
+8. Save the best-performing model.
+9. Deploy using Streamlit (optional).
 
 ---
 
 ## 🤖 Models Evaluated
-
-- K-Nearest Neighbors (KNN)
 - Logistic Regression
 - Random Forest
-- Multi-Layer Perceptron (MLP)
+- Naive Bayes
+- Simple Neural Network (MLPClassifier)
 
 **Best Model:** Random Forest
 
@@ -68,12 +71,10 @@ Gone-Phishing/
 
 ## 🌐 Live Demo
 
-**Streamlit App:** *(Add your Streamlit URL here)*
-
-Example:
+**Streamlit App:** 
 
 ```
-https://gone-phishing.streamlit.app
+https://gone-phishing.streamlit.app/
 ```
 
 ---
@@ -84,15 +85,15 @@ https://gone-phishing.streamlit.app
 
 ### Legitimate Email Prediction
 
-![Legitimate Prediction](prediction.png)
+![Legitimate Prediction](Legitimate.png)
 
 ### Phishing Email Prediction
 
-![Phishing Prediction](prediction2.png)
+![Phishing Prediction](phishing.png)
 
 ## 📚 Dataset
 
-Phishing Email Dataset from Kaggle:
+This project uses the **Phishing Email Dataset** available on Kaggle. The dataset contains phishing and legitimate emails collected from multiple publicly available sources and is used for training and evaluating the machine learning models.
 
 https://www.kaggle.com/datasets/naserabdullahalam/phishing-email-dataset
 
@@ -111,9 +112,9 @@ https://www.kaggle.com/datasets/naserabdullahalam/phishing-email-dataset
 
 ## 👩‍💻 Author
 
-**Niveditha**
+**Niveditha N**
 
-B.Tech Student
+B.Tech Computer Science and Engineering Student
 
 ---
 
