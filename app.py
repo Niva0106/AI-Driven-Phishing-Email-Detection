@@ -1,13 +1,19 @@
 import streamlit as st
 import joblib
+import pandas as pd
 import re
 import nltk
+from scipy.sparse import csr_matrix, hstack
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
-# Load Model and Vectorizer
-model = joblib.load("phishing_model.pkl")
-vectorizer = joblib.load("tfidf_vectorizer.pkl")
+@st.cache_resource
+def load_model():
+    model = joblib.load("phishing_model.pkl")
+    vectorizer = joblib.load("tfidf_vectorizer.pkl")
+    return model, vectorizer
+
+model, vectorizer = load_model()
 
 # Text Cleaning Function
 nltk.download('stopwords')
@@ -28,14 +34,47 @@ def clean_text(text):
     words = [stemmer.stem(word) for word in words if word not in stop_words]
     return " ".join(words)
 
-# Page Configuration
+SUSPICIOUS_KEYWORDS = [
+    "verify",
+    "account",
+    "password",
+    "login",
+    "click",
+    "urgent",
+    "bank",
+    "security",
+    "confirm",
+    "update"
+]
+
+
+def url_count(text):
+    return len(re.findall(r"(https?://\S+|www\.\S+)", text))
+def email_count(text):
+    return len(re.findall(r"\S+@\S+", text))
+def digit_count(text):
+    return sum(c.isdigit() for c in text)
+def capital_count(text):
+    return sum(c.isupper() for c in text)
+def exclamation_count(text):
+    return text.count("!")
+def email_length(text):
+    return len(text)
+def word_count(text):
+    return len(text.split())
+def suspicious_keyword_count(text):
+    text = text.lower()
+    return sum(
+        len(re.findall(rf"\b{word}\b", text))
+        for word in SUSPICIOUS_KEYWORDS
+    )
+
 st.set_page_config(
     page_title="Gone Phishing",
     page_icon="🎣",
     layout="centered"
 )
 
-# Custom CSS
 st.markdown("""
 <style>
 
@@ -84,6 +123,8 @@ with st.sidebar:
 
     st.title("🎣 Gone Phishing")
 
+    st.caption("AI-powered phishing email detection using Machine Learning")
+
     st.write("""
 ### About
 
@@ -93,12 +134,12 @@ to detect whether an email is likely to be:
 - ✅ Legitimate
 - ⚠️ Phishing
 
-### Technologies
-
-- Random Forest
-- TF-IDF Vectorizer
-- Streamlit
-- Scikit-learn
+### Model Pipeline
+• Text Cleaning
+• Porter Stemming
+• TF-IDF (7000 Features)
+• Engineered Email Features
+• Random Forest Classifier
 """)
 
     st.divider()
@@ -133,13 +174,30 @@ if st.button("🎣 Cast the Net"):
 
         cleaned = clean_text(email)
 
-        vector = vectorizer.transform([cleaned])
+        # TF-IDF
+        tfidf_features = vectorizer.transform([cleaned])
 
-        prediction = model.predict(vector)
+        # Engineered Features
+        extra = pd.DataFrame([{
+            "url_count": url_count(email),
+            "email_count": email_count(email),
+            "digit_count": digit_count(email),
+            "capital_count": capital_count(email),
+            "exclamation_count": exclamation_count(email),
+            "email_length": email_length(email),
+            "word_count": word_count(email),
+            "keyword_count": suspicious_keyword_count(email)
+        }])
 
-        probabilities = model.predict_proba(vector)
+        extra_sparse = csr_matrix(extra.values)
 
-        confidence = max(probabilities[0]) * 100
+        final_features = hstack([tfidf_features, extra_sparse])
+
+        prediction = model.predict(final_features)
+
+        probabilities = model.predict_proba(final_features)
+
+        confidence = probabilities.max() * 100
 
         st.divider()
 
@@ -148,30 +206,41 @@ if st.button("🎣 Cast the Net"):
             st.error("🦈 Suspicious Catch!")
 
             st.write("""
-The model believes this email is likely to be a **phishing attempt**.
+        Our AI net believes this email is **likely to be a phishing attempt**.
 
-Be cautious before clicking links or downloading attachments.
-""")
+        🎣 **Stay alert!**
+        - Avoid clicking unknown links.
+        - Do not download unexpected attachments.
+        - Verify the sender before taking any action.
+        """)
 
         else:
 
-            st.success("🐟 Safe Catch!")
+            st.success("🐟 Clean Catch!")
 
             st.write("""
-The model believes this email appears to be **legitimate**.
-""")
+        Our AI net believes this email appears to be **legitimate**.
 
-        st.subheader("Prediction Confidence")
+        🎣 **Still remember:**
+        Even legitimate-looking emails should be treated carefully if they request sensitive information.
+        """)
 
-        st.progress(confidence / 100)
+        st.subheader("🎯 Prediction Confidence")
+
+        st.progress(float(confidence) / 100)
 
         st.write(f"**Confidence:** {confidence:.2f}%")
+
+        with st.expander("🔍 What did the model analyse?"):
+            st.dataframe(extra, use_container_width=True)
 
 # Footer
 st.divider()
 
 st.caption(
-    "⚠️ This application is intended for educational purposes. "
-    "Machine learning predictions are not always perfect and should "
-    "be used alongside good cybersecurity practices."
+"""
+Educational project developed using Random Forest and TF-IDF.
+
+Predictions should be used as guidance and not as a replacement for cybersecurity best practices.
+"""
 )
